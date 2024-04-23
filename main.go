@@ -19,6 +19,10 @@ var (
   rand_len int
 )
 
+type URL struct {
+  Url  string `json:"url" form:"url" query:"url"`
+}
+
 func init() {
   db = make(map[string]string)
   // z-base-32
@@ -43,7 +47,11 @@ func main() {
     e := echo.New()
 
     e.POST("/short", func(c echo.Context) error {
-      url := c.FormValue("url")
+      s_url := new(URL)
+      if err := c.Bind(s_url); err != nil {
+        return c.String(http.StatusBadRequest, "bad request")
+      }
+      url := s_url.Url
 
       if _, ok := db[url]; !ok {
         s := random_string()
